@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Tuple, Callable
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, wordpunct_tokenize
 from nltk.stem import PorterStemmer 
 from nltk.stem import WordNetLemmatizer 
 import re
@@ -20,6 +20,9 @@ def path_reader(path:str, initial_id:int = 0)->Tuple[int,Dict[int,str],Dict[int,
             ids+=1
     return (ids, dic_name, dic_text)
 
+no_terms = [' ', '.', ',', '!', '/', '(', ')', '?', ';', ':', 
+        '...', "'", """""""", "”", "’", "“"]
+
 class TextProcessor:
 
     def __init__(self, unnused_characters:list[str] = []) -> None:
@@ -27,8 +30,7 @@ class TextProcessor:
         self._stop_words.extend(unnused_characters)
         self._stemmer = None
         self._lemmatizer = None
-        #self._lemmatizer = WordNetLemmatizer()
-    
+
     def add_unnused_characters(self, unnused_characters:list[str])->None:
         self._stop_words.extend(unnused_characters)
 
@@ -45,10 +47,13 @@ class TextProcessor:
         text = re.sub(r"\'t", " not", text)
         text = re.sub(r"\'ve", " have", text)
         text = re.sub(r"\'m", " am", text)
+
+        text = re.sub(r"[\'#\(\)/.,;:?$%!&*^]+", " ", text)
         return text
 
     def tokenizer_text(self, text:str)->list[str]:
-        return word_tokenize(text)
+        return wordpunct_tokenize(text)
+        #return word_tokenize(text)
 
     def remove_non_important_terms(self, tokens:list[str])->list[str]:
         without = []

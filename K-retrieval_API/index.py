@@ -27,5 +27,5 @@ class Index(ABC):
         """ Devuelve la lista de documentos indexados"""
 
     @abstractmethod
-    def clean(self) -> list[str]:
+    def clean(self):
         """ Vacía la colección"""

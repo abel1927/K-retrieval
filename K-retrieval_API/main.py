@@ -14,12 +14,32 @@ no_terms = [' ', '.', ',', '!', '/', '(', ')', '?', ';', ':',
 index = VectorialIndex(textProcessor=TextProcessor(unnused_characters=no_terms))
 
 source = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/cranAll/"
-query = "what similarity laws must be obeyed when constructing aeroelastic models of heated high speed aircraft ."
 
 add_source(source, index)
 
-r = retrieval(query, index)
+# from pprint import pprint
 
-#i = True
-for doc, s, text in r[0:30]:
-    print(f"{doc} -- {round(s, 4)}")
+# pprint(index._all_words)
+# print("\nDocumnets:")
+# pprint(index._documents)
+# print("\nDocumentsText")
+# pprint(index._documentsText)
+# print("\nDocumentsTokens")
+# pprint(index._documentsTokens)
+# print("\nWords Count")
+# pprint(index._words_count)
+# print("\nWords TF")
+# pprint(index._words_TF)
+# print("\nWords IDF")
+# pprint(index._words_IDF)
+# print("\nWords TFxIDF")
+# pprint(index._words_TFxIDF)
+
+while True:
+    q = input("Query or e(for exit):")
+    if q == "e":
+        exit()
+    r = retrieval(q, index)
+    for doc, s in r[0:20]:
+        print(f"{doc} -- {round(s, 4)}")
+    print("----------------------------------------")

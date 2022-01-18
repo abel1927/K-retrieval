@@ -6,7 +6,7 @@ class Vectorizer:
     def words_extraction(self, collection:list[list[str]])-> set[str]:
         s = None
         if len(collection) > 0:
-            s = set(collection.pop(0))
+            s = set(collection[0])
             for texts in  collection:
                 s = s.union(texts)
         return s
