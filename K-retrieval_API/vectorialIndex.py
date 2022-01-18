@@ -98,10 +98,10 @@ class VectorialIndex(Index):
         self._documents:Dict[int,str] = {} # {id:name}
         self._documentsText:Dict[int,str] = {} # {id:text}
         self._documentsTokens:Dict[int,list[str]] = {} #{id: tokens}
-        self._words_count:Dict[int, Dict[str:int]] = {} # {id : {word:count}}
-        self._words_TF:Dict[int, Dict[str:float]] = {} # {id : {word:tf}}
-        self._words_IDF:Dict[str:float] = {} # {word:idf}
-        self._words_TFxIDF:Dict[int, Dict[str:float]] = {} # {id : {word:tfxidf}}
+        self._words_count:Dict[int,Dict[str,int]] = {} # {id : {word:count}}
+        self._words_TF:Dict[int, Dict[str,float]] = {} # {id : {word:tf}}
+        self._words_IDF:Dict[str,float] = {} # {word:idf}
+        self._words_TFxIDF:Dict[int, Dict[str,float]] = {} # {id : {word:tfxidf}}
         self._all_words:set[str] = set()
         self._last_index = 0
 

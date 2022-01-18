@@ -23,10 +23,10 @@ def index_time(index:Index, coleccion_path:str, rep:int = 5)->None:
         start = time()
         index.add_source(coleccion_path)
         end = time()
-        print(f"start:{start}   end:{end}   time-{i}:{start-end}")
+        print(f"start:{start}   end:{end}  time-{i}:{round(end-start,2)}")
         times.append((end-start))
         index.clean()
-    print(f"Index time promedio: {sum(times)/rep}")
+    print(f"Index time promedio: {round(sum(times)/rep,2)}")
 
 def cran_metrics(index:Index, cranAll_path:str, cranQry_path:str, cranRel_path:str, save:bool=False):
     cranEval = CranEval(index=index, cranAll=cranAll_path, cranQry=cranQry_path, cranRel=cranRel_path)
@@ -94,4 +94,4 @@ def cran_metrics(index:Index, cranAll_path:str, cranQry_path:str, cranRel_path:s
             fig.savefig(f'Recall-Precision {rank}.png')
 
 
-index_time(index, cranAll_path, 3)
+index_time(index, cranAll_path)
