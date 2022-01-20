@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from measures import *
 from index import Index
 from text_processing import TextProcessor, no_terms
-from vectorialIndex import VectorialIndex
+from vectrorialIndex import VectorialIndex
 
 def __load_Keys(cranKey:str) -> Dict[int, list[int]]:
     _open=open(cranKey)
@@ -17,9 +17,20 @@ def __load_Keys(cranKey:str) -> Dict[int, list[int]]:
         keys[int(r[0])].append(int(r[1]))
     return keys
 
+def __load_Qry(cranQry:str) -> Dict[int, str]:
+    _open=open(cranQry)
+    _lines=_open.readlines()
+    _open.close()
+    queries:Dict[int,str] = {}
+    i, n = 0, len(_lines)
+    while i < n:
+        queries[int(_lines[i])] = _lines[i+1]
+        i+=2
+    return queries
+
 def save_retrieval_all_query(cranIndex:Index, cranQry:str, response_path:str, rank:int=40)->None:
     file = open(response_path, 'w')
-    queries = __load_Keys(cranQry)
+    queries = __load_Qry(cranQry)
     for q_id, query in queries.items():
         for d, sim in cranIndex.get_rank(query=query)[:rank]:
             file.write(f"{q_id} {d[:-4]} {sim}\n")
@@ -47,7 +58,7 @@ def plot(y_label:str, xlabel:str,suptitle:str, vals:list, color:str, save:bool):
     if save:
         fig.savefig(f'{suptitle}.png')
 
-def metrics_by_rank(cranRel:str, cranRes:str, ranks=[-1,10,20,40], plot:bool=False, save:bool=False):
+def metrics_by_rank(cranRel:str, cranRes:str, ranks=[-1,10,20,40], ploting:bool=False, save:bool=False):
     q_relevants = __load_Keys(cranRel)
     q_top20 = __load_Keys(cranRes)
 
@@ -70,19 +81,19 @@ def metrics_by_rank(cranRel:str, cranRes:str, ranks=[-1,10,20,40], plot:bool=Fal
             recalls.append(r)
             f1.append(f)
             fallouts.append(fall)
-        if plot:
+        if ploting:
             plot('#queries', 'Precision', f'Presicion {n_top}', vals=precisions, color='mediumblue', save=save)
         print(f"Precision promedio {n_top}: {round(sum(precisions)/len(precisions),4)}")
 
-        if plot:
+        if ploting:
             plot('#queries', 'Recall', f'Recall {n_top}', vals=f1, color='indigo', save=save)
         print(f"Recall promedio {n_top}: {round(sum(recalls)/len(recalls),4)}")
 
-        if plot:
+        if ploting:
             plot('#queries', 'F1', f'F1 {n_top}', vals=f1, color='darkcyan', save=save)
         print(f"F1 promedio {n_top}: {round(sum(f1)/len(f1),4)}")
 
-        if plot:
+        if ploting:
             plot('#queries', 'Fallout', f'Fallaout {n_top}', vals=fallouts, color='darkmagenta', save=save)
         print(f"Follout promedio {n_top}: {round(sum(fallouts)/len(fallouts),4)}")
 
@@ -105,15 +116,15 @@ cranRel_path = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test 
 
 #----Descomentar esta seccion para crear un nuevo response -----------#
 #
-#cranSaveResponse_path = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/response3.txt"
-#cranIndex = VectorialIndex(textProcessor=TextProcessor(unnused_characters=no_terms))
-#cranIndex.add_source(cranAll_path)
-#save_retrieval_all_query(cranIndex, cranQry_path, cranSaveResponse_path)
+cranSaveResponse_path = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/response3.txt"
+cranIndex = VectorialIndex(textProcessor=TextProcessor(unnused_characters=no_terms))
+cranIndex.add_source(cranAll_path)
+save_retrieval_all_query(cranIndex, cranQry_path, cranSaveResponse_path)
 #
 #-------
 
 #----Descomentar esta seccion para obtener las metricas response -----------#
 
-#cranLoadResponse_path = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/response2.txt"
-#metrics_by_rank(cranRel_path, cranLoadResponse_path, plot=True, save=True)
+cranLoadResponse_path = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/response3.txt"
+metrics_by_rank(cranRel_path, cranLoadResponse_path, ploting=True, save=True)
 

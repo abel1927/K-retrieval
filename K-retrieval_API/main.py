@@ -1,6 +1,6 @@
 from index import Index
-from vectorialIndex import VectorialIndex
 from text_processing import TextProcessor
+from vectrorialIndex import VectorialIndex
 
 def add_source(path:str, index:Index):
     index.add_source(path)
@@ -15,25 +15,13 @@ index = VectorialIndex(textProcessor=TextProcessor(unnused_characters=no_terms))
 
 source = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/cranAll/"
 
+from time import time
+
+s = time()
 add_source(source, index)
+e = time()
 
-# from pprint import pprint
-
-# pprint(index._all_words)
-# print("\nDocumnets:")
-# pprint(index._documents)
-# print("\nDocumentsText")
-# pprint(index._documentsText)
-# print("\nDocumentsTokens")
-# pprint(index._documentsTokens)
-# print("\nWords Count")
-# pprint(index._words_count)
-# print("\nWords TF")
-# pprint(index._words_TF)
-# print("\nWords IDF")
-# pprint(index._words_IDF)
-# print("\nWords TFxIDF")
-# pprint(index._words_TFxIDF)
+print(f"time: {round(e-s,4)}")
 
 while True:
     q = input("Query or e(for exit):")

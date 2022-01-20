@@ -6,10 +6,10 @@ from nltk.stem import PorterStemmer
 from nltk.stem import WordNetLemmatizer 
 import re
 
-def path_reader(path:str, initial_id:int = 0)->Tuple[int,Dict[int,str],Dict[int,str]]:
+def path_reader(path:str)->Tuple[Dict[int,str],Dict[int,str]]:
     dic_name={}
     dic_text={}
-    ids=initial_id
+    ids=0
     for ruta, _ , archivos in os.walk(path, topdown=True):
         for elemento in archivos:
             _open=open(ruta+'/'+elemento)
@@ -18,7 +18,7 @@ def path_reader(path:str, initial_id:int = 0)->Tuple[int,Dict[int,str],Dict[int,
             dic_name[ids]=elemento 
             dic_text[ids] = _read
             ids+=1
-    return (ids, dic_name, dic_text)
+    return (dic_name, dic_text)
 
 no_terms = [' ', '.', ',', '!', '/', '(', ')', '?', ';', ':', 
         '...', "'", """""""", "”", "’", "“"]
@@ -48,8 +48,12 @@ class TextProcessor:
         text = re.sub(r"\'ve", " have", text)
         text = re.sub(r"\'m", " am", text)
 
-        text = re.sub(r"[\'#\(\)/.,;:?$%!&*^]+", " ", text)
+        #text = re.sub(r"[\'#\(\)/.,;:?$%!&*^]+", " ", text)
         return text
+
+    def only_alpha(self, text:str)->str:
+        text = re.sub(r"[^a-z]"," ", text)
+        return re.sub(r" +", " ", text)
 
     def tokenizer_text(self, text:str)->list[str]:
         return wordpunct_tokenize(text)
@@ -89,4 +93,3 @@ class TextProcessor:
             for w in words:
                 normalized.append(self._lemmatizer.lemmatize(w))
         return normalized
-
