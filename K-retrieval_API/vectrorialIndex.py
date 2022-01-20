@@ -4,6 +4,8 @@ from math import log10
 from text_processing import TextProcessor, path_reader
 from vectorization import Vectorizer
 
+from pprint import pprint
+
 class VectorialIndex(Index):
 
     def __init__(self, 
@@ -51,6 +53,7 @@ class VectorialIndex(Index):
         self._postingList = index
         self._idf = idf
         self._documents = dict_name
+        pprint(idf)
 
 
     def get_rank(self, query:str) -> list:

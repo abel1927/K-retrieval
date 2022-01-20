@@ -14,3 +14,12 @@ def F(rr:int, ir:int, rt:int, beta:float = 1)->float:
 
 def fallaout(ri:int, it:int)->float:
     return ri/it
+
+def mean_avg_precision(relevants:set[int], responses:list[int]):
+    precisions = []
+    rr = 0
+    for i in range(len(relevants)):
+        if relevants[i] in responses:
+            rr+=1
+        precisions.append(rr/(i+1))
+    return sum(precisions)/len(precisions)
