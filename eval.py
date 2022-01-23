@@ -1,12 +1,13 @@
 from typing import Dict
 from matplotlib import pyplot as plt
-from measures import *
-from index import Index
-from text_processing import TextProcessor, no_terms
-from vectrorialIndex import VectorialIndex
+from model.measures import *
+from model.index import Index
+from model.text_processing import TextProcessor, no_terms
+from model.vectrorialIndex import VectorialIndex
+from time import time
 
-def __load_Keys(cranKey:str) -> Dict[int, list[int]]:
-    _open=open(cranKey)
+def __load_Keys(key:str) -> Dict[int, list[int]]:
+    _open=open(key)
     _lines=_open.readlines()
     _open.close()
     keys:Dict[int,list[int]] = {}
@@ -17,8 +18,8 @@ def __load_Keys(cranKey:str) -> Dict[int, list[int]]:
         keys[int(r[0])].append(int(r[1]))
     return keys
 
-def __load_Qry(cranQry:str) -> Dict[int, str]:
-    _open=open(cranQry)
+def __load_Qry(qry:str) -> Dict[int, str]:
+    _open=open(qry)
     _lines=_open.readlines()
     _open.close()
     queries:Dict[int,str] = {}
@@ -28,12 +29,23 @@ def __load_Qry(cranQry:str) -> Dict[int, str]:
         i+=2
     return queries
 
+def time_test(source:str, index:Index, rep:int=10)-> float:
+    total = 0
+    for _ in range(rep):
+        start = time()
+        index.add_source(source)
+        end = time()
+        total+=end-start
+        index.clean()
+    return round(total/rep,4)
+
+
 def save_retrieval_all_query(Index:Index, Qry:str, response_path:str, rank:int=40)->None:
     file = open(response_path, 'w')
     queries = __load_Qry(Qry)
     for q_id, query in queries.items():
         for d, sim in Index.get_rank(query=query)[:rank]:
-            file.write(f"{q_id} {d[:-4]} {sim}\n")
+            file.write(f"{q_id} {d.name()} {sim}\n")
     file.close()
 
 def get_metrics(relevants:set[int], responses:set[int], docs_total:int):
@@ -67,7 +79,6 @@ def metrics_by_rank(rels:str, res:str, docs_total:int,
         ranks=[-1,10,20,40], ploting:bool=False, save:bool=False):
     q_relevants = __load_Keys(rels)
     q_top20 = __load_Keys(res)
-
     n_top = ""
     for top in ranks:
         if top == -1:
@@ -83,7 +94,7 @@ def metrics_by_rank(rels:str, res:str, docs_total:int,
             rank = top
             if top == -1:
                 rank = len(relevants)
-                map = mean_avg_precision(set(relevants), q_top20[q_id][:rank])
+                map = mean_avg_precision(relevants, q_top20[q_id][:rank])
             p,r,f,fall = get_metrics(set(relevants), set(q_top20[q_id][:rank]), docs_total)
             precisions.append(p)
             recalls.append(r)
@@ -131,9 +142,16 @@ cisiQry = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Colle
 cisiRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cisi/CISI.REL"
 
 nlpAll = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/nlp docs/"
-nlpQry = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/nlpall"
-nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/nlprel"
+nlpQry = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/nlpQuery.txt"
+nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/nlpRel.txt"
 
+#----Descomentar esta seccion para correr los test de tiempo  -----------#
+#
+#print(f"Cran Indexed time: {time_test(cranAll, VectorialIndex(), 25)}")
+#print(f"Cisi Indexed time: {time_test(cisiAll, VectorialIndex(), 25)}")
+#print(f"Nlp Indexed time: {time_test(nlpAll, VectorialIndex(), 25)}")
+#
+#----------
 
 #----Descomentar esta seccion para crear un nuevo response -----------#
 #
@@ -149,7 +167,7 @@ nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collec
 #------------
 
 
-#----Descomentar esta seccion para obtener las metricas response -----------#
+#----Descomentar esta seccion para obtener las metricas -----------#
 
 #Cran Metrics
 #cranLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/cran_response.txt"
@@ -157,8 +175,8 @@ nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collec
 
 #Cisi Metrics
 #cisiLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cisi/response/cisi_response.txt"
-#metrics_by_rank(cranRel, cisiLoadResponse, docs_total=1460, ploting=True, save=True)
+#metrics_by_rank(cisiRel, cisiLoadResponse, docs_total=1460, ploting=True, save=True)
 
 #Nlp Metrics
 #nlpLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/response/nlp_response.txt"
-#metrics_by_rank(cranRel, nlpLoadResponse, docs_total=11429, ploting=True, save=True)
+#metrics_by_rank(nlpRel, nlpLoadResponse, docs_total=11429, ploting=True, save=True)

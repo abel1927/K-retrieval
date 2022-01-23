@@ -1,24 +1,29 @@
 import os
 from typing import Dict, Tuple, Callable
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, wordpunct_tokenize
+from nltk.tokenize import  wordpunct_tokenize
 from nltk.stem import PorterStemmer 
 from nltk.stem import WordNetLemmatizer 
 import re
+from .doc import Doc
 
-def path_reader(path:str)->Tuple[Dict[int,str],Dict[int,str]]:
-    dic_name={}
+def path_reader(path:str, start_id:int)->Tuple[Dict[int,Doc],Dict[int,str]]:
+    dic_docs={}
     dic_text={}
-    ids=0
-    for ruta, _ , archivos in os.walk(path, topdown=True):
-        for elemento in archivos:
-            _open=open(ruta+'/'+elemento)
+    ids=  start_id
+    for path, _ , files in os.walk(path, topdown=True):
+        for doc in files:
+            _open=open(path+'/'+doc)
             _read=_open.read()
             _open.close()
-            dic_name[ids]=elemento 
+            name, extension = os.path.splitext(doc)
+            name = name.removesuffix(extension)
+            first_300 = _read[:300]
+            first_300 = first_300+"..." if len(_read)>300 else first_300
+            dic_docs[ids]= Doc(name, path+'/'+doc, first_300, extension)
             dic_text[ids] = _read
             ids+=1
-    return (dic_name, dic_text)
+    return (dic_docs, dic_text)
 
 no_terms = [' ', '.', ',', '!', '/', '(', ')', '?', ';', ':', 
         '...', "'", """""""", "”", "’", "“"]
@@ -35,10 +40,11 @@ class TextProcessor:
         self._stop_words.extend(unnused_characters)
 
     def expand_text(self,text:str)-> str:
+        """ Devuelve el texto expandiendo las contracciones 
+        Ej can't ->  can not
+        """
         text = re.sub(r"won\'t", "will not", text, re.IGNORECASE)
         text = re.sub(r"can\'t", "can not", text, re.IGNORECASE)
-    
-        # general
         text = re.sub(r"n\'t", " not", text)
         text = re.sub(r"\'re", " are", text)
         text = re.sub(r"\'s", " is", text)
@@ -48,16 +54,16 @@ class TextProcessor:
         text = re.sub(r"\'ve", " have", text)
         text = re.sub(r"\'m", " am", text)
 
-        #text = re.sub(r"[\'#\(\)/.,;:?$%!&*^]+", " ", text)
         return text
 
     def only_alpha(self, text:str)->str:
+        """ Elimina todas las cadenas no alfabéticas """
         text = re.sub(r"[^a-z]"," ", text)
         return re.sub(r" +", " ", text)
 
     def tokenizer_text(self, text:str)->list[str]:
+        """ Devuelve la lista de tokens del texto """
         return wordpunct_tokenize(text)
-        #return word_tokenize(text)
 
     def remove_non_important_terms(self, tokens:list[str])->list[str]:
         without = []

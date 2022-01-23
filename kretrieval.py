@@ -1,6 +1,8 @@
 import streamlit as st
 from pathlib import Path
-from utils import temp_load, temp_query
+from model.vectrorialIndex import VectorialIndex
+from os import startfile
+import matplotlib.pyplot as plt
 
 def title():
     st.markdown(
@@ -34,23 +36,51 @@ def show_files_paginator():
     start_idx = st.session_state.page_number * N 
     end_idx = (1 + st.session_state.page_number) * N
     for i in range(start_idx,min(end_idx, len(files))):
-        st.markdown(
-        f"<h4>{i+1} -  {files[i]}</h3>",
-        unsafe_allow_html=True,)
+        with st.expander(f"{i+1}   -  {files[i].name()}"):
+            st.write(f"*Preview:*  {files[i].first_300()}")
+            if st.button("open",key=i+1):
+                startfile(files[i].path())
 
 def load_source():
     search = st.text_input('Enter the path of information', value=st.session_state.last_path)
-    if st.button('Load'):
+    add, _ , stats, _, clean = st.columns([1,8,1,1,1])
+    if add.button("Add"):
         if search == "":
             st.error("Path to load information is required")
         elif not Path.exists(Path(search)):
             st.error("No such directory")
         else:
             st.session_state.last_path = search
-            files = temp_load(search)
-            st.success(f"{len(files)} files were found!!")
-            st.write(files)
+            N = st.session_state.index.add_source(search)
+            st.success(f"{N} files have been indexed!!")
         clean_query_session_variables()
+    if stats.button("Stats"):
+        st.info("##### **Collection Statistics**")
+        stats = st.session_state.index.get_stats()
+        sources, docs, terms, time = st.columns(4)
+        sources.metric("Total sources", stats['total sorces'])
+        docs.metric("Indexed docs", stats['total docs'])
+        terms.metric("Indexed terms", stats['total terms'])
+        time.metric('Indexed time/Doc', f"{stats['indexed time/doc']} s")
+
+        if stats['total sorces'] > 0:
+            fig, ax = plt.subplots()
+            ax.set_xlabel("Idf")
+            fig.suptitle("Inversed document frequency", fontsize=15)
+            plt.hist(stats['idfs'], color='b', bins=15)
+            st.pyplot(fig)
+
+        st.write(" ")
+        st.write(f"Most present terms:")
+        st.write(stats['most present terms'])
+
+
+    if clean.button("Clean"):
+        with st.spinner('Cleanning...'):
+            st.session_state.index.clean()
+            st.success("Index already empty!!")
+            clean_query_session_variables()
+            st.session_state.last_path = ""
 
 def search_engine():
     search = st.text_input('Enter the query', value=st.session_state.last_query)
@@ -62,11 +92,11 @@ def search_engine():
             st.error("Is necesary load information source first")
         else:
             with st.spinner('Wait for it...'):
-                files = temp_query(search, st.session_state.last_path)
+                files = st.session_state.index.get_rank(search)
                 if len(files) > 0:
                     st.success("Retrieval done!")
                     st.session_state.last_query = search
-                    st.session_state.last_files_recovered = files
+                    st.session_state.last_files_recovered = [d for d,_ in files]
                     show_files_paginator()
                 else:
                     st.write(f"No Search results, please try again with different keywords")   
@@ -74,8 +104,9 @@ def search_engine():
         if st.session_state.last_query != "" or len(st.session_state.last_files_recovered) != 0:
             show_files_paginator()
 
-
 if __name__ == '__main__':
+    if 'index' not in st.session_state:
+        st.session_state.index = VectorialIndex()
     if 'load' not in st.session_state:
         st.session_state.load = False
     if 'page_number' not in st.session_state:
@@ -87,10 +118,19 @@ if __name__ == '__main__':
     if 'last_files_recovered' not in st.session_state:
         st.session_state.last_files_recovered = []
     
-    st.sidebar.header('K-retrieval, A information retrieval system')
-    nav = st.sidebar.radio('',['Load data source', 'Query phase'])
-    st.sidebar.write('')
-    st.sidebar.write('')
+    st.set_page_config(
+        page_title="K-retrieval")
+
+    st.sidebar.header('K-retrieval, An information retrieval system')
+    nav = st.sidebar.radio('',['Load data source', 'Search engine'])
+    st.sidebar.markdown(""" \n \n""")
+
+    st.sidebar.markdown(" ## [Source Code](https://github.com/abel1927/K-retrieval)", unsafe_allow_html=True,)
+    st.sidebar.markdown(""" \n""")
+
+    expander = st.sidebar.expander('Team')
+    expander.markdown("### We are students of CS at the MATCOM faculty of Havana University.\n #### Claudia Puentes Hernández [ClauP99] (https://github.com/ClauP99)\n #### Abel Molina Sánchez [abel1927] (https://github.com/abel1927)", unsafe_allow_html=True,)
+    
     title()
     if nav == 'Load data source':
         load_source()

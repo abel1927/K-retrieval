@@ -1,14 +1,19 @@
 from abc import ABC, abstractmethod
+from typing import Dict
 
 class Index(ABC):
 
     @abstractmethod
-    def add_source(self, new_path:str)-> None:
-        """ Indexa los documentos presentes en new_path"""
+    def add_source(self, new_path:str)-> int:
+        """ Indexa los documentos presentes en source_path"""
 
     @abstractmethod
     def get_rank(self, query:str) -> list:
         """ Devuelve los resultados relevantes para la consulta"""
+
+    @abstractmethod
+    def get_sources(self) -> list[str]:
+        """ Devuelve las rutas presentes en la colección"""
 
     @abstractmethod
     def get_indexed_terms_count(self) -> int:
@@ -29,3 +34,7 @@ class Index(ABC):
     @abstractmethod
     def clean(self):
         """ Vacía la colección"""
+
+    @abstractmethod
+    def get_stats(self) -> Dict:
+        """ Devuelve estadisticas de la colección """
