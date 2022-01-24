@@ -25,9 +25,6 @@ def path_reader(path:str, start_id:int)->Tuple[Dict[int,Doc],Dict[int,str]]:
             ids+=1
     return (dic_docs, dic_text)
 
-no_terms = [' ', '.', ',', '!', '/', '(', ')', '?', ';', ':', 
-        '...', "'", """""""", "”", "’", "“"]
-
 class TextProcessor:
 
     def __init__(self, unnused_characters:list[str] = []) -> None:
@@ -76,7 +73,7 @@ class TextProcessor:
     method:str = 'l', other_method:Callable[[str],str]=None)->list[str]:
         """
         Normaliza los términos utilizando el método seleccionado en el parámeto 'method'.
-        Si no se incluye el parámeto 'method' o es un valor incorrecto se utiliza el 
+        Si no se incluye el parámeto 'method' o es un valor incorrecto se utiliza 
         por defecto el método de WordNetLemmatizer.
         Si se recibe el parámetro 'other_method' se utiliza este para la normalización sin 
         importat el valor en 'method' 

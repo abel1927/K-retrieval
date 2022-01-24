@@ -2,7 +2,7 @@ from typing import Dict
 from matplotlib import pyplot as plt
 from model.measures import *
 from model.index import Index
-from model.text_processing import TextProcessor, no_terms
+from model.text_processing import TextProcessor
 from model.vectrorialIndex import VectorialIndex
 from time import time
 
@@ -52,7 +52,7 @@ def get_metrics(relevants:set[int], responses:set[int], docs_total:int):
     r = len(responses)
     rr = len(responses.intersection(relevants))
     ri = r-rr
-    rt = len(relevants)
+    rt = min(len(relevants),r)
     it = docs_total - rt
     p = precision(rr,ri) if rr+ri > 0 else 0
     rec = recall(rr, rt) if rt > 0 else 0
@@ -70,19 +70,19 @@ def plot(y_label:str, xlabel:str,suptitle:str, vals:list, color:str, save:bool):
     if save:
         fig.savefig(f'{suptitle}.png')
 
-def generate_response(save_response_path:str, all_path:str, qry_path:str):
-    index = VectorialIndex(textProcessor=TextProcessor(unnused_characters=no_terms))
+def generate_response(save_response_path:str, all_path:str, qry_path:str, rank=40):
+    index = VectorialIndex()
     index.add_source(all_path)
-    save_retrieval_all_query(index, qry_path, save_response_path)
+    save_retrieval_all_query(index, qry_path, save_response_path, rank=rank)
 
 def metrics_by_rank(rels:str, res:str, docs_total:int,
-        ranks=[-1,10,20,40], ploting:bool=False, save:bool=False):
+        ranks=[-1,5,10,20,40], ploting:bool=False, save:bool=False):
     q_relevants = __load_Keys(rels)
     q_top20 = __load_Keys(res)
     n_top = ""
     for top in ranks:
         if top == -1:
-            n_top = "K-metric"
+            n_top = "R-metric"
             print(n_top)
         else:
             n_top = f"Top-{str(top)} metric"
@@ -94,7 +94,7 @@ def metrics_by_rank(rels:str, res:str, docs_total:int,
             rank = top
             if top == -1:
                 rank = len(relevants)
-                map = mean_avg_precision(relevants, q_top20[q_id][:rank])
+            map += avg_precision(relevants, q_top20[q_id][:rank])
             p,r,f,fall = get_metrics(set(relevants), set(q_top20[q_id][:rank]), docs_total)
             precisions.append(p)
             recalls.append(r)
@@ -104,8 +104,7 @@ def metrics_by_rank(rels:str, res:str, docs_total:int,
             plot('#queries', 'Precision', f'Presicion {n_top}', vals=precisions, color='mediumblue', save=save)
         print(f"Average Precision {n_top}: {round(sum(precisions)/len(precisions),4)}")
 
-        if top==-1:
-            print(f"Mean Average Prercision {n_top}: {map}")
+        print(f"Mean Average Precision {n_top}: {round(map/len(q_relevants),4)}")
 
         if ploting:
             plot('#queries', 'Recall', f'Recall {n_top}', vals=f1, color='indigo', save=save)
@@ -121,7 +120,7 @@ def metrics_by_rank(rels:str, res:str, docs_total:int,
 
         print('\n')
 
-        if plot:
+        if ploting:
             fig, ax = plt.subplots()
             ax.set_ylabel('recall')
             ax.set_xlabel('precision')
@@ -147,9 +146,9 @@ nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collec
 
 #----Descomentar esta seccion para correr los test de tiempo  -----------#
 #
-#print(f"Cran Indexed time: {time_test(cranAll, VectorialIndex(), 25)}")
-#print(f"Cisi Indexed time: {time_test(cisiAll, VectorialIndex(), 25)}")
-#print(f"Nlp Indexed time: {time_test(nlpAll, VectorialIndex(), 25)}")
+#print(f"Cran Indexed time: {time_test(cranAll, VectorialIndex(), 100)}")
+#print(f"Cisi Indexed time: {time_test(cisiAll, VectorialIndex(), 100)}")
+#print(f"Nlp Indexed time: {time_test(nlpAll, VectorialIndex(), 100)}")
 #
 #----------
 
@@ -159,7 +158,7 @@ nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collec
 #generate_response(cranSaveResponse, cranAll, cranQry)
 
 #cisiSaveResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cisi/response/cisi_response.txt"
-#generate_response(cisiSaveResponse, cisiAll, cisiQry)
+#generate_response(cisiSaveResponse, cisiAll, cisiQry, rank=175)
 
 #nlpSaveResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/response/nlp_response.txt"
 #generate_response(nlpSaveResponse, nlpAll, nlpQry)
@@ -171,12 +170,12 @@ nlpRel = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collec
 
 #Cran Metrics
 #cranLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cran/response/cran_response.txt"
-#metrics_by_rank(cranRel, cranLoadResponse, docs_total=1400, ploting=True, save=True)
+#metrics_by_rank(cranRel, cranLoadResponse, docs_total=1400, ploting=False, save=True)
 
 #Cisi Metrics
 #cisiLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/cisi/response/cisi_response.txt"
-#metrics_by_rank(cisiRel, cisiLoadResponse, docs_total=1460, ploting=True, save=True)
+#metrics_by_rank(cisiRel, cisiLoadResponse, docs_total=1460, ploting=False, save=True)
 
 #Nlp Metrics
 #nlpLoadResponse = "D:/AMS/Estudios/#3roS2/SRI/Proyecto Final/Test Collections/Test Collections/nlp/response/nlp_response.txt"
-#metrics_by_rank(nlpRel, nlpLoadResponse, docs_total=11429, ploting=True, save=True)
+#metrics_by_rank(nlpRel, nlpLoadResponse, docs_total=11429, ploting=False, save=True)

@@ -98,7 +98,7 @@ class VectorialIndex(Index):
         length = [(k**(1/2))*Wq for k in length]
         for d in range(len(rank)):
             rank[d] = rank[d]/length[d] if length[d]!=0 else 0
-        return  [(self._documents[key], score) for score, key in sorted(zip(rank,list(self._documents.keys())), reverse=True)]
+        return [(self._documents[key], score) for score, key in sorted(zip(rank,list(self._documents.keys())), reverse=True) if score != 0]
 
     def get_sources(self) -> list[str]:
         """ Devuelve las rutas presentes en la colección"""
@@ -136,15 +136,17 @@ class VectorialIndex(Index):
         'total sorces' : int,
         "most present terms" : list[(str,int)]
         "idfs" : idfvalues,
-        "indexed time/doc" : float}
+        "indexed time/doc" : str}
         """
         stats = {}
-        stats['total terms'] = self.get_indexed_terms_count()
+        t_docs = self.get_indexed_terms_count()
+        stats['total terms'] = t_docs
         stats['total docs'] = self.get_indexed_docs_count()
         stats['total sorces'] = len(self._sources)
         more_present_terms = [(t,len(docs)) for t, docs in self._index.items()]
         more_present_terms.sort(key = lambda x: x[1], reverse=True)
         stats['most present terms'] = more_present_terms[:10]
         stats['idfs'] = list(self._idf.values())
-        stats['indexed time/doc'] = round(self._acc_index_time/self.get_indexed_docs_count(),4)
+        
+        stats['indexed time/doc'] = round(self._acc_index_time/t_docs,4) if t_docs > 0 else '-'
         return stats

@@ -9,9 +9,9 @@ def words_extraction(collection:list[list[str]])-> set[str]:
             s = s.union(texts)
     return s
 
-def words_count(all_words:set[str], document_word:list[str])-> Dict[str,int]:
+def words_count(all_words:set[str], document_words:list[str])-> Dict[str,int]:
     words_count = dict.fromkeys(all_words, 0)
-    for word in document_word:
+    for word in document_words:
         words_count[word]+=1
     return words_count
 

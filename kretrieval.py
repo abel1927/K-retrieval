@@ -3,6 +3,7 @@ from pathlib import Path
 from model.vectrorialIndex import VectorialIndex
 from os import startfile
 import matplotlib.pyplot as plt
+from time import time
 
 def title():
     st.markdown(
@@ -92,14 +93,17 @@ def search_engine():
             st.error("Is necesary load information source first")
         else:
             with st.spinner('Wait for it...'):
+                start= time()
                 files = st.session_state.index.get_rank(search)
+                end = time()
+                search_time = round(end-start, 3)
                 if len(files) > 0:
-                    st.success("Retrieval done!")
+                    st.success(f"Retrieval done!  \n Search time: {search_time}s")
                     st.session_state.last_query = search
                     st.session_state.last_files_recovered = [d for d,_ in files]
                     show_files_paginator()
                 else:
-                    st.write(f"No Search results, please try again with different keywords")   
+                    st.write(f"No Search results, please try again with different keywords. Search time:{search_time}s")   
     else:
         if st.session_state.last_query != "" or len(st.session_state.last_files_recovered) != 0:
             show_files_paginator()
