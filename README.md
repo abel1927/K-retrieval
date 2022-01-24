@@ -11,10 +11,10 @@ python >= 3.9.2 and functional pip command
 pip install requirements.txt
 ```
 ```
->>>import nlkt
->>>nlkt.download('punkt')
->>>nlkt.download('wordnet')
->>>nlkt.download('stopwords')
+>>>import nltk
+>>>nltk.download('punkt')
+>>>nltk.download('wordnet')
+>>>nltk.download('stopwords')
 ```
 
 ### Run the app locally
