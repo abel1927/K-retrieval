@@ -1,9 +1,9 @@
 import streamlit as st
 from pathlib import Path
 from model.vectrorialIndex import VectorialIndex
-from os import startfile
 import matplotlib.pyplot as plt
 from time import time
+import os, platform, subprocess
 
 def title():
     st.markdown(
@@ -40,7 +40,11 @@ def show_files_paginator():
         with st.expander(f"{i+1}   -  {files[i].name()}"):
             st.write(f"*Preview:*  {files[i].first_300()}")
             if st.button("open",key=i+1):
-                startfile(files[i].path())
+                if platform.system() == "Windows":
+                    os.startfile(files[i].path())
+                else:
+                    opener = "open" if platform.system() == "Darwin" else "xdg-open"
+                    subprocess.call([opener, files[i].path()])
 
 def load_source():
     search = st.text_input('Enter the path of information', value=st.session_state.last_path)

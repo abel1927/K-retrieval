@@ -13,7 +13,7 @@ def path_reader(path:str, start_id:int)->Tuple[Dict[int,Doc],Dict[int,str]]:
     ids=  start_id
     for path, _ , files in os.walk(path, topdown=True):
         for doc in files:
-            _open=open(path+'/'+doc)
+            _open=open(path+'/'+doc, encoding='Windows-1252')
             _read=_open.read()
             _open.close()
             name, extension = os.path.splitext(doc)

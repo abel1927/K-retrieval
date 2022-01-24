@@ -2,7 +2,6 @@ from typing import Dict
 from matplotlib import pyplot as plt
 from model.measures import *
 from model.index import Index
-from model.text_processing import TextProcessor
 from model.vectrorialIndex import VectorialIndex
 from time import time
 
